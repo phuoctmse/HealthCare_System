@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Validation for UserForm
 export const UserFormValidation = z.object({
   name: z
     .string()
@@ -11,6 +12,7 @@ export const UserFormValidation = z.object({
     .refine((phone) => /^\+\d{10,15}$/.test(phone), "Invalid phone number"),
 });
 
+// Validation for PatientForm
 export const PatientFormValidation = z.object({
   name: z
     .string()
@@ -76,9 +78,12 @@ export const PatientFormValidation = z.object({
     }),
 });
 
+// Create Appointment Schema with validation
 export const CreateAppointmentSchema = z.object({
   primaryPhysician: z.string().min(2, "Select at least one doctor"),
-  schedule: z.coerce.date(),
+  schedule: z.coerce.date().refine((date) => date > new Date(), {
+    message: "Appointment date must be in the future",
+  }),
   reason: z
     .string()
     .min(2, "Reason must be at least 2 characters")
@@ -87,17 +92,23 @@ export const CreateAppointmentSchema = z.object({
   cancellationReason: z.string().optional(),
 });
 
+// Schedule Appointment Schema with validation
 export const ScheduleAppointmentSchema = z.object({
   primaryPhysician: z.string().min(2, "Select at least one doctor"),
-  schedule: z.coerce.date(),
+  schedule: z.coerce.date().refine((date) => date > new Date(), {
+    message: "Appointment date must be in the future",
+  }),
   reason: z.string().optional(),
   note: z.string().optional(),
   cancellationReason: z.string().optional(),
 });
 
+// Cancel Appointment Schema with validation
 export const CancelAppointmentSchema = z.object({
   primaryPhysician: z.string().min(2, "Select at least one doctor"),
-  schedule: z.coerce.date(),
+  schedule: z.coerce.date().refine((date) => date > new Date(), {
+    message: "Appointment date must be in the future",
+  }),
   reason: z.string().optional(),
   note: z.string().optional(),
   cancellationReason: z
@@ -106,6 +117,7 @@ export const CancelAppointmentSchema = z.object({
     .max(500, "Reason must be at most 500 characters"),
 });
 
+// Get the correct schema based on the type of appointment
 export function getAppointmentSchema(type: string) {
   switch (type) {
     case "create":
